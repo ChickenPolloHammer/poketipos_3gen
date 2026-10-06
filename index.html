@@ -63,6 +63,18 @@ td.focus{outline:3px solid var(--ink);outline-offset:-3px}
 .pi .chip{min-height:36px;cursor:pointer;font-size:.78rem}
 .fav{flex:none;width:48px;height:48px;border:0;background:none;font-size:1.8rem;line-height:1;color:var(--mute);cursor:pointer}
 .fav.on{color:#e6a700}
+
+/* Diagrama de lógica de combate */
+.flow{display:flex;flex-direction:column;align-items:center;padding:4px 0 12px}
+.flowbox{width:min(780px,100%);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.flowbox h2{font-size:1rem;margin:0 0 7px}.flowbox p{margin:4px 0;line-height:1.45}.flowstart{text-align:center;border-color:var(--acc)}
+.flowdecision{background:color-mix(in srgb,var(--acc) 7%,var(--card));border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
+.flowdef{border-color:var(--x05)}.flowfinal{text-align:center;border-color:var(--acc)}
+.flowarrow{height:34px;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:1.4rem}
+.flowbranches{width:min(800px,100%);display:grid;grid-template-columns:1fr 1fr;gap:8px}.flowbranch{padding:10px;border-radius:10px;text-align:center;font-weight:700;font-size:.86rem}
+.flowyes{background:color-mix(in srgb,var(--x2) 13%,var(--card));color:var(--x2);border:1px solid color-mix(in srgb,var(--x2) 45%,var(--line))}
+.flowno{background:color-mix(in srgb,var(--x05) 10%,var(--card));color:var(--x05);border:1px solid color-mix(in srgb,var(--x05) 40%,var(--line))}
+@media(max-width:600px){.flowbox{padding:13px}.flowbranches{grid-template-columns:1fr;gap:6px}.flowarrow{height:28px}}                  
 </style>
 </head>
 <body>
@@ -95,6 +107,31 @@ td.focus{outline:3px solid var(--ink);outline-offset:-3px}
     <div id="dexout"></div>
   </section>
 
+
+  <section id="logica">
+    <div class="flow">
+      <div class="flowbox flowstart"><h2>⚔️ INICIO DEL COMBATE</h2></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowdecision"><h2>1. 🔎 Comprobación de ataque</h2><p>Compruebo el tipo del enemigo → ¿qué debilidades tiene?</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowdecision"><h2>2. ⚔️ Comprobar mis ataques</h2><p>¿Alguno de mis ataques es eficaz contra el enemigo?</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbranches"><div class="flowbranch flowyes">SÍ → Ataco con ese ataque</div><div class="flowbranch flowno">NO → Reviso los ataques de mis Pokémon disponibles</div></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowdecision"><h2>3. 🔄 Buscar otro Pokémon</h2><p>¿Alguno de mis Pokémon disponibles tiene un ataque eficaz?</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbranches"><div class="flowbranch flowyes">SÍ → Saco ese Pokémon y utilizo el ataque efectivo</div><div class="flowbranch flowno">NO → Paso a modo defensivo</div></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowdef"><h2>4. 🛡️ MODO DEFENSIVO</h2><p>Compruebo el tipo de los posibles ataques del enemigo.</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowdef"><h2>5. 🧱 Buscar resistencia</h2><p>¿Cuál de mis Pokémon es resistente a esos tipos?</p><p>→ Saco al Pokémon que mejor resista los posibles ataques del enemigo.</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowfinal"><h2>6. 💥 Elegir ataque</h2><p>Utilizo ataques que tengan el <strong>mayor número de potencia</strong></p><p>y cuyo tipo sea <strong>neutral (daño ×1)</strong> contra el tipo del enemigo.</p></div>
+      <div class="flowarrow">↓</div>
+      <div class="flowbox flowstart"><h2>🔁 CONTINUAR EL COMBATE</h2></div>
+    </div>
+  </section>
+  
   <p class="gen">En Esmeralda, el ataque es físico o especial según su tipo, no según el movimiento. Habilidades como Levitación, Absorbe Agua, Absorbe Elec., Absorbe Fuego o Superguarda pueden cambiar estos resultados.</p>
 </main>
 <nav>
@@ -102,6 +139,7 @@ td.focus{outline:3px solid var(--ink);outline-offset:-3px}
   <button data-s="atacante">Ataque</button>
   <button data-s="defensor">Defensa</button>
   <button data-s="dex">Pokédex</button>
+  <button data-s="logica">Lógica combate</button> 
 </nav>
 
 <script>
