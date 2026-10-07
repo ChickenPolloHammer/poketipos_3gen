@@ -100,6 +100,7 @@ body.right .panel{left:auto;right:12px}
 .tab.on .tl{color:var(--acc)}
 .tl{padding:0 4px 0 14px}
 .tx{width:40px;font-size:1.3rem;line-height:1}
+.sub{margin:14px 0 6px;font-size:.95rem}
 </style>
 </head>
 <body>
@@ -319,19 +320,22 @@ function dexCard(p){
   <div class="chips">${p[2].map(t=>`<button class="chip" data-t="1" style="background:${INFO[t].c}">${INFO[t].n}</button>`).join("")}</div></div>
   <button class="fav${f?" on":""}" data-f="1" aria-pressed="${f}" aria-label="${f?"Quitar de favoritos":"Marcar como favorito"}">${f?"★":"☆"}</button></div>`;
 }
+function favBlock(){
+  const fl=DEX.filter(p=>FAV.includes(p[0]));
+  document.getElementById("dexfavh").textContent="Favoritos ("+fl.length+")";
+  document.getElementById("dexfav").innerHTML=fl.length?fl.map(dexCard).join(""):'<p class="none">Aún no tienes favoritos.</p>';
+}
 function renderDex(){
   const q=norm(document.getElementById("q").value),hint=document.getElementById("dexhint"),out=document.getElementById("dexout");
-  let list;
   if(!q){
-    list=DEX.filter(p=>FAV.includes(p[0]));
-    hint.textContent=list.length?"Tus favoritos:":"Aún no tienes favoritos. Busca un Pokémon y toca la estrella para guardarlo.";
-  }else{
-    const n=q.replace(/^#/,"");
-    list=DEX.filter(p=>norm(p[1]).includes(q)||(/^\d+$/.test(n)&&p[0]===+n));
-    hint.textContent=list.length?(list.length>30?"Mostrando 30 de "+list.length+". Escribe más para afinar.":list.length+" resultado"+(list.length>1?"s":"")):"Sin resultados. Solo están los Pokémon que puedes ver durante la partida, sin eventos ni intercambios.";
-    list=list.slice(0,30);
+    hint.textContent="Toca la estrella de un Pokémon para guardarlo en favoritos.";
+    out.innerHTML='<h3 class="sub" id="dexfavh"></h3><div id="dexfav"></div><h3 class="sub">Todos los Pokémon ('+DEX.length+')</h3><div id="dexall">'+DEX.map(dexCard).join("")+'</div>';
+    favBlock();return;
   }
-  out.innerHTML=list.map(dexCard).join("");
+  const n=q.replace(/^#/,"");
+  let list=DEX.filter(p=>norm(p[1]).includes(q)||(/^\d+$/.test(n)&&p[0]===+n));
+  hint.textContent=list.length?(list.length>30?"Mostrando 30 de "+list.length+". Escribe más para afinar.":list.length+" resultado"+(list.length>1?"s":"")):"Sin resultados. Solo están los Pokémon que puedes ver durante la partida, sin eventos ni intercambios.";
+  out.innerHTML=list.slice(0,30).map(dexCard).join("");
 }
 document.getElementById("q").oninput=renderDex;
 document.getElementById("dexout").onclick=e=>{
@@ -339,8 +343,13 @@ document.getElementById("dexout").onclick=e=>{
   const id=+card.dataset.id,p=DEX.find(x=>x[0]===id);
   if(e.target.closest("[data-f]")){
     FAV=FAV.includes(id)?FAV.filter(x=>x!==id):[...FAV,id];saveFav();
-    if(!document.getElementById("q").value)renderDex();
-    else{const b=card.querySelector(".fav"),on=FAV.includes(id);b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Quitar de favoritos":"Marcar como favorito")}
+    const on=FAV.includes(id),inAll=!!card.closest("#dexall"),before=card.getBoundingClientRect().top;
+    const setStar=b=>{b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Quitar de favoritos":"Marcar como favorito")};
+    if(!document.getElementById("q").value){
+      document.querySelectorAll('#dexall .pk[data-id="'+id+'"] .fav').forEach(setStar);
+      favBlock();
+      if(inAll)document.querySelector("main").scrollTop+=card.getBoundingClientRect().top-before;
+    }else setStar(card.querySelector(".fav"));
   }else if(e.target.closest("[data-t]")){
     S=p[2].slice();markD();renderD();go("defensor");
   }
