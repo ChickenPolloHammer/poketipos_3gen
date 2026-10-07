@@ -14,14 +14,12 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
-header{padding:12px 16px 8px}
+header{display:flex;align-items:center;gap:12px;padding:10px 12px 8px}
 h1{font-size:1.25rem;margin:0;letter-spacing:-.01em}
 header p{margin:2px 0 0;color:var(--mute);font-size:.85rem}
 main{flex:1;overflow-y:auto;padding:8px 12px 16px}
 section{display:none}section.on{display:block}
 nav{display:flex;overflow-x:auto;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
-nav button{flex:1 0 auto;padding:0 14px;white-space:nowrap;min-height:56px;border:0;background:none;color:var(--mute);font:600 .8rem inherit;font-family:inherit;cursor:pointer;border-top:3px solid transparent}
-nav button.on{color:var(--acc);border-top-color:var(--acc)}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .chip{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 10px;border-radius:10px;border:2px solid transparent;color:#fff;font:700 .85rem inherit;font-family:inherit;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 .picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 14px}
@@ -80,15 +78,51 @@ td.focus{outline:3px solid var(--ink);outline-offset:-3px}
 .st div{background:var(--bg);border-radius:8px;padding:6px 2px}
 .st small{display:block;color:var(--mute);font-size:.7rem}
 .st strong{font-size:1.05rem}
+.ht{min-width:0}
+body.right header{flex-direction:row-reverse;text-align:right}
+.mbtn{flex:none;width:44px;height:44px;display:grid;place-content:center;gap:5px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;padding:0}
+.mbtn span{display:block;width:20px;height:3px;background:var(--ink);border-radius:2px}
+#menu{position:fixed;inset:0;z-index:20}
+#menu[hidden],nav[hidden]{display:none}
+.bd{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.panel{position:absolute;top:calc(env(safe-area-inset-top,0px) + 62px);left:12px;width:min(300px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+body.right .panel{left:auto;right:12px}
+.it{display:flex;width:100%;min-height:48px;align-items:center;padding:0 12px;border:0;background:none;color:var(--ink);font-weight:600;font-size:1rem;font-family:inherit;border-radius:10px;cursor:pointer;text-align:left}
+.it.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:0 12px;border-top:1px solid var(--line);margin-top:6px;font-size:.9rem;color:var(--mute);cursor:pointer}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:99px;background:var(--line);position:relative;margin:0;cursor:pointer;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw input:checked{background:var(--acc)}
+.sw input:checked::after{transform:translateX(18px)}
+.tab{flex:1 0 auto;display:flex;align-items:stretch;border-top:3px solid transparent}
+.tab.on{border-top-color:var(--acc)}
+.tab button{border:0;background:none;color:var(--mute);font-weight:600;font-size:.8rem;font-family:inherit;cursor:pointer;min-height:56px;white-space:nowrap}
+.tab.on .tl{color:var(--acc)}
+.tl{padding:0 4px 0 14px}
+.tx{width:40px;font-size:1.3rem;line-height:1}
 </style>
 </head>
 <body>
 <header>
-  <h1>Tipos · Pokémon Esmeralda</h1>
-  <p>Tabla de 3.ª generación (GBA) · 17 tipos</p>
+  <button class="mbtn" id="mbtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+  <div class="ht">
+    <h1>Tipos · Pokémon Esmeralda</h1>
+    <p>Tabla de 3.ª generación (GBA) · 17 tipos</p>
+  </div>
 </header>
+<div id="menu" hidden>
+  <div class="bd" id="bd"></div>
+  <div class="panel" role="menu" id="panel">
+    <div id="items"></div>
+    <label class="sw"><span>Botón del menú a la derecha</span><input type="checkbox" role="switch" id="sideSw"></label>
+  </div>
+</div>
 <main>
-  <section id="tabla" class="on">
+  <section id="inicio" class="on">
+    <div class="card"><h3>Bienvenido</h3><div class="none">Toca el botón del menú (las tres rayas) y elige una sección. Las secciones que abras se irán añadiendo como pestañas abajo; ciérralas con la ×.</div></div>
+  </section>
+
+  <section id="tabla">
     <div class="legend"><span><b class="m2c">2</b> muy eficaz (×2)</span><span><b class="m05c">½</b> poco eficaz (×½)</span><span><b>0</b> no afecta (×0)</span></div>
     <div class="tw"><table id="grid"></table></div>
     <div class="msg" id="cellmsg" aria-live="polite">Toca una casilla para ver el detalle. Filas: atacante. Columnas: defensor.</div>
@@ -145,14 +179,7 @@ td.focus{outline:3px solid var(--ink);outline-offset:-3px}
 
   <p class="gen">En Esmeralda, el ataque es físico o especial según su tipo, no según el movimiento. Habilidades como Levitación, Absorbe Agua, Absorbe Elec., Absorbe Fuego o Superguarda pueden cambiar estos resultados.</p>
 </main>
-<nav>
-  <button data-s="tabla" class="on">Tabla</button>
-  <button data-s="atacante">Ataque</button>
-  <button data-s="defensor">Defensa</button>
-  <button data-s="dex">Pokédex</button>
-  <button data-s="logica">Lógica combate</button>
-  <button data-s="movs">Movimientos</button> 
-</nav>
+<nav id="tabs" hidden></nav>
 
 <script>
 const T=[
@@ -188,12 +215,43 @@ const sym=m=>m===2?"2":m===.5?"½":m===0?"0":"";
 const chip=(id,x="")=>`<span class="chip" style="background:${INFO[id].c}">${INFO[id].n}${x}</span>`;
 
 // Navegación
-function go(id){
-  document.querySelectorAll("nav button,section").forEach(e=>e.classList.remove("on"));
-  document.querySelector(`nav button[data-s="${id}"]`).classList.add("on");
-  document.getElementById(id).classList.add("on");
+const SEC=[["tabla","Tabla"],["atacante","Ataque"],["defensor","Defensa"],["dex","Pokédex"],["logica","Lógica combate"],["movs","Movimientos"]];
+const NAME=Object.fromEntries(SEC);
+let TABS=[],CUR=null;
+const $=id=>document.getElementById(id);
+function show(id){
+  document.querySelectorAll("section").forEach(e=>e.classList.remove("on"));
+  $(id||"inicio").classList.add("on");
   document.querySelector("main").scrollTop=0;}
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>go(b.dataset.s));
+function renderTabs(){
+  const nav=$("tabs");nav.hidden=!TABS.length;
+  nav.innerHTML=TABS.map(id=>`<div class="tab${id===CUR?" on":""}" data-s="${id}"><button class="tl">${NAME[id]}</button><button class="tx" aria-label="Cerrar ${NAME[id]}">×</button></div>`).join("");
+  const a=nav.querySelector(".tab.on");if(a)a.scrollIntoView({inline:"center",block:"nearest"});
+  $("items").querySelectorAll(".it").forEach(b=>b.classList.toggle("on",b.dataset.s===CUR));}
+function go(id){
+  if(!TABS.includes(id))TABS.push(id);
+  CUR=id;renderTabs();show(id);closeMenu();}
+function closeTab(id){
+  const i=TABS.indexOf(id);if(i<0)return;
+  TABS.splice(i,1);
+  if(CUR===id){CUR=TABS[i]||TABS[i-1]||null;show(CUR)}
+  renderTabs();}
+$("tabs").onclick=e=>{
+  const t=e.target.closest(".tab");if(!t)return;
+  if(e.target.closest(".tx"))closeTab(t.dataset.s);else go(t.dataset.s);};
+// Menú
+$("items").innerHTML=SEC.map(s=>`<button class="it" role="menuitem" data-s="${s[0]}">${s[1]}</button>`).join("");
+$("items").onclick=e=>{const b=e.target.closest(".it");if(b)go(b.dataset.s)};
+function openMenu(){$("menu").hidden=false;$("mbtn").setAttribute("aria-expanded","true");renderTabs()}
+function closeMenu(){$("menu").hidden=true;$("mbtn").setAttribute("aria-expanded","false")}
+$("mbtn").onclick=()=>$("menu").hidden?openMenu():closeMenu();
+$("bd").onclick=closeMenu;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu()});
+// Lado del botón (se recuerda)
+function setSide(r){document.body.classList.toggle("right",r);$("sideSw").checked=r}
+let SIDE=false;try{SIDE=localStorage.getItem("tipos-esmeralda-side")==="right"}catch(e){}
+setSide(SIDE);
+$("sideSw").onchange=e=>{setSide(e.target.checked);try{localStorage.setItem("tipos-esmeralda-side",e.target.checked?"right":"left")}catch(x){}};
 
 // Tabla completa
 (function(){
