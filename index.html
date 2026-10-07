@@ -101,6 +101,8 @@ body.right .panel{left:auto;right:12px}
 .tl{padding:0 4px 0 14px}
 .tx{width:40px;font-size:1.3rem;line-height:1}
 .sub{margin:14px 0 6px;font-size:.95rem}
+.grp{padding:12px 12px 2px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.it.sub{width:calc(100% - 12px);margin-left:12px;padding-left:16px;border-left:2px solid var(--line);border-radius:0 10px 10px 0}
 </style>
 </head>
 <body>
@@ -216,7 +218,8 @@ const sym=m=>m===2?"2":m===.5?"½":m===0?"0":"";
 const chip=(id,x="")=>`<span class="chip" style="background:${INFO[id].c}">${INFO[id].n}${x}</span>`;
 
 // Navegación
-const SEC=[["tabla","Tabla"],["atacante","Ataque"],["defensor","Defensa"],["dex","Pokédex"],["logica","Lógica combate"],["movs","Movimientos"]];
+const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
+const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
 const NAME=Object.fromEntries(SEC);
 let TABS=[],CUR=null;
 const $=id=>document.getElementById(id);
@@ -241,7 +244,7 @@ $("tabs").onclick=e=>{
   const t=e.target.closest(".tab");if(!t)return;
   if(e.target.closest(".tx"))closeTab(t.dataset.s);else go(t.dataset.s);};
 // Menú
-$("items").innerHTML=SEC.map(s=>`<button class="it" role="menuitem" data-s="${s[0]}">${s[1]}</button>`).join("");
+$("items").innerHTML=MENU.map(m=>m[0]?`<button class="it${m[2]?" sub":""}" role="menuitem" data-s="${m[0]}">${m[1]}</button>`:`<div class="grp">${m[1]}</div>`).join("");
 $("items").onclick=e=>{const b=e.target.closest(".it");if(b)go(b.dataset.s)};
 function openMenu(){$("menu").hidden=false;$("mbtn").setAttribute("aria-expanded","true");renderTabs()}
 function closeMenu(){$("menu").hidden=true;$("mbtn").setAttribute("aria-expanded","false")}
