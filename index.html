@@ -19,7 +19,7 @@ h1{font-size:1.25rem;margin:0;letter-spacing:-.01em}
 header p{margin:2px 0 0;color:var(--mute);font-size:.85rem}
 main{flex:1;overflow-y:auto;padding:8px 12px 16px}
 section{display:none}section.on{display:block}
-nav{display:flex;overflow-x:auto;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
+nav{display:flex;overflow-x:auto;background:var(--card);border-top:1px solid var(--line);gap:6px;padding:4px 6px calc(4px + env(safe-area-inset-bottom,0px))}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .chip{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 10px;border-radius:10px;border:2px solid transparent;color:#fff;font:700 .85rem inherit;font-family:inherit;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 .picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 14px}
@@ -94,12 +94,14 @@ body.right .panel{left:auto;right:12px}
 .sw input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
 .sw input:checked{background:var(--acc)}
 .sw input:checked::after{transform:translateX(18px)}
-.tab{flex:1 0 auto;display:flex;align-items:stretch;border-top:3px solid transparent}
-.tab.on{border-top-color:var(--acc)}
-.tab button{border:0;background:none;color:var(--mute);font-weight:600;font-size:.8rem;font-family:inherit;cursor:pointer;min-height:56px;white-space:nowrap}
+.tab{flex:1 0 auto;display:flex;align-items:stretch;overflow:hidden;border:2px solid color-mix(in srgb,var(--ink) 35%,transparent);border-radius:10px;background:color-mix(in srgb,var(--ink) 6%,var(--card))}
+.tab.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,var(--card))}
+.tab.on .tl{font-weight:800}
+.tab:not(.on) .tl{color:var(--ink)}
+.tab button{border:0;background:none;color:var(--mute);font-weight:600;font-size:.8rem;font-family:inherit;cursor:pointer;min-height:34px;white-space:nowrap}
 .tab.on .tl{color:var(--acc)}
 .tl{padding:0 4px 0 14px}
-.tx{width:40px;font-size:1.3rem;line-height:1}
+.tab .tx{flex:none;margin-left:auto;width:36px;font-size:1.2rem;line-height:1;background:#c62828;color:#fff}
 .sub{margin:14px 0 6px;font-size:.95rem}
 .grp{padding:12px 12px 2px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 .it.sub{width:calc(100% - 12px);margin-left:12px;padding-left:16px;border-left:2px solid var(--line);border-radius:0 10px 10px 0}
