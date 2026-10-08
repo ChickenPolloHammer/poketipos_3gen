@@ -122,6 +122,15 @@ h4.cols span:first-child{flex:1}
 .tf{display:flex;gap:6px;overflow-x:auto;padding:5px 5px 9px;margin:2px 0}
 .tf .chip{flex:none;min-height:36px;font-size:.8rem;opacity:.62;cursor:pointer}
 .tf .chip.sel{opacity:1;border-color:var(--ink);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.pk.mvc{display:block;padding:10px 8px 8px 12px}
+.mvt{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mvt b{font-size:1rem}
+.mvr{display:flex;align-items:center;gap:6px;margin-top:8px}
+.mvr .chip{flex:none;min-height:36px;width:76px;padding:0 4px;font-size:.78rem;cursor:pointer}
+.mvr .st{flex:1;min-width:0;gap:4px}
+.mvr .st small{font-size:.64rem}
+.mvr .st strong{font-size:1rem}
+.mvr .fav{flex:none;width:44px;height:44px}
 </style>
 </head>
 <body>
@@ -427,10 +436,9 @@ const saveMFav=()=>{try{localStorage.setItem(MKEY,JSON.stringify(MFAV))}catch(e)
 function mvCard(m){
   const t=m[2],ok=INFO[t],cls=m[6]?"Estado":FIS.includes(t)?"Físico":"Especial",f=MFAV.includes(m[0]);
   const chip=ok?`<button class="chip" data-t="${t}" style="background:${ok.c}">${ok.n}</button>`:`<span class="chip" style="background:#777">???</span>`;
-  return `<div class="pk" data-id="${m[0]}"><div class="pi"><b>${m[1]}</b><small>${cls}</small>
-  <div class="chips">${chip}</div>
-  <div class="st"><div><small>Potencia</small><strong>${m[3]||"—"}</strong></div><div><small>Precisión</small><strong>${m[4]?m[4]+"%":"—"}</strong></div><div><small>PP</small><strong>${m[5]}</strong></div></div></div>
-  <button class="fav${f?" on":""}" data-f="1" aria-pressed="${f}" aria-label="${f?"Quitar de favoritos":"Marcar como favorito"}">${f?"★":"☆"}</button></div>`;
+  return `<div class="pk mvc" data-id="${m[0]}"><div class="mvt"><b>${m[1]}</b><span class="badge">${cls}</span></div>
+  <div class="mvr">${chip}<div class="st"><div><small>Potencia</small><strong>${m[3]||"—"}</strong></div><div><small>Precisión</small><strong>${m[4]?m[4]+"%":"—"}</strong></div><div><small>PP</small><strong>${m[5]}</strong></div></div>
+  <button class="fav${f?" on":""}" data-f="1" aria-pressed="${f}" aria-label="${f?"Quitar de favoritos":"Marcar como favorito"}">${f?"★":"☆"}</button></div></div>`;
 }
 function renderMov(){
   const q=norm(document.getElementById("qm").value),hint=document.getElementById("mvhint"),out=document.getElementById("mvout");
