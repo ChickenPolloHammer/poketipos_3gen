@@ -119,6 +119,9 @@ h4.sub{margin:10px 0 2px;font-size:.8rem;color:var(--mute);text-transform:upperc
 .pw{width:30px}.ac{width:40px}
 h4.cols{display:flex;gap:6px;padding:0 6px}
 h4.cols span:first-child{flex:1}
+.tf{display:flex;gap:6px;overflow-x:auto;padding:5px 5px 9px;margin:2px 0}
+.tf .chip{flex:none;min-height:36px;font-size:.8rem;opacity:.62;cursor:pointer}
+.tf .chip.sel{opacity:1;border-color:var(--ink);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
 </style>
 </head>
 <body>
@@ -166,6 +169,7 @@ h4.cols span:first-child{flex:1}
 
   <section id="dex">
     <input id="q" type="search" placeholder="Buscar por nombre o número" autocomplete="off" aria-label="Buscar Pokémon">
+    <div class="tf" id="tf" role="group" aria-label="Filtrar por tipo"></div>
     <p class="hint" id="dexhint"></p>
     <div id="dexout"></div>
   </section>
@@ -368,24 +372,32 @@ function dexCard(p){
   <div class="chips">${p[2].map(t=>`<button class="chip" data-t="1" style="background:${INFO[t].c}">${INFO[t].n}</button>`).join("")}<button class="lsb" data-l="1" aria-expanded="${OPEN.has(p[0])}">Ataques ${OPEN.has(p[0])?"▴":"▾"}</button></div></div>
   <button class="fav${f?" on":""}" data-f="1" aria-pressed="${f}" aria-label="${f?"Quitar de favoritos":"Marcar como favorito"}">${f?"★":"☆"}</button><div class="ls">${OPEN.has(p[0])?lsHTML(p[0]):""}</div></div>`;
 }
+let TF=[];
 function favBlock(){
   const fl=DEX.filter(p=>FAV.includes(p[0]));
   document.getElementById("dexfavh").textContent="Favoritos ("+fl.length+")";
   document.getElementById("dexfav").innerHTML=fl.length?fl.map(dexCard).join(""):'<p class="none">Aún no tienes favoritos.</p>';
 }
 function renderDex(){
-  const q=norm(document.getElementById("q").value),hint=document.getElementById("dexhint"),out=document.getElementById("dexout");
-  if(!q){
+  const q=norm(document.getElementById("q").value),hint=document.getElementById("dexhint"),out=document.getElementById("dexout"),has=TF.length;
+  if(!q&&!has){
     hint.textContent="Toca la estrella de un Pokémon para guardarlo en favoritos.";
     out.innerHTML='<h3 class="sub" id="dexfavh"></h3><div id="dexfav"></div><h3 class="sub">Todos los Pokémon ('+DEX.length+')</h3><div id="dexall">'+DEX.map(dexCard).join("")+'</div>';
     favBlock();return;
   }
   const n=q.replace(/^#/,"");
-  let list=DEX.filter(p=>norm(p[1]).includes(q)||(/^\d+$/.test(n)&&p[0]===+n));
-  hint.textContent=list.length?(list.length>30?"Mostrando 30 de "+list.length+". Escribe más para afinar.":list.length+" resultado"+(list.length>1?"s":"")):"Sin resultados. Solo están los Pokémon que puedes ver durante la partida, sin eventos ni intercambios.";
-  out.innerHTML=list.slice(0,30).map(dexCard).join("");
+  const list=DEX.filter(p=>TF.every(t=>p[2].includes(t))&&(!q||norm(p[1]).includes(q)||(/^\d+$/.test(n)&&p[0]===+n)));
+  const tn=TF.map(t=>INFO[t].n).join(" / ");
+  if(has)hint.textContent=list.length?list.length+" Pokémon · "+tn:"Ningún Pokémon con "+(TF.length>1?"esa combinación de tipos":"ese tipo")+(q?" y esa búsqueda":"")+".";
+  else hint.textContent=list.length?(list.length>30?"Mostrando 30 de "+list.length+". Escribe más para afinar.":list.length+" resultado"+(list.length>1?"s":"")):"Sin resultados. Solo están los Pokémon que puedes ver durante la partida, sin eventos ni intercambios.";
+  out.innerHTML=(has?list:list.slice(0,30)).map(dexCard).join("");
 }
 document.getElementById("q").oninput=renderDex;
+document.getElementById("tf").innerHTML=T.map(t=>`<button class="chip" data-t="${t[0]}" aria-pressed="false" style="background:${t[3]}">${t[1]}</button>`).join("");
+document.getElementById("tf").onclick=e=>{const b=e.target.closest("button");if(!b)return;const t=b.dataset.t;
+  TF=TF.includes(t)?TF.filter(x=>x!==t):[...TF,t].slice(-2);
+  document.querySelectorAll("#tf button").forEach(x=>{const s=TF.includes(x.dataset.t);x.classList.toggle("sel",s);x.setAttribute("aria-pressed",s)});
+  renderDex();};
 document.getElementById("dexout").onclick=e=>{
   const card=e.target.closest(".pk");if(!card)return;
   const id=+card.dataset.id,p=DEX.find(x=>x[0]===id);
@@ -395,7 +407,7 @@ document.getElementById("dexout").onclick=e=>{
     FAV=FAV.includes(id)?FAV.filter(x=>x!==id):[...FAV,id];saveFav();
     const on=FAV.includes(id),inAll=!!card.closest("#dexall"),before=card.getBoundingClientRect().top;
     const setStar=b=>{b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Quitar de favoritos":"Marcar como favorito")};
-    if(!document.getElementById("q").value){
+    if(!document.getElementById("q").value&&!TF.length){
       document.querySelectorAll('#dexall .pk[data-id="'+id+'"] .fav').forEach(setStar);
       favBlock();
       if(inAll)document.querySelector("main").scrollTop+=card.getBoundingClientRect().top-before;
