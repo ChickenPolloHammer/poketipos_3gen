@@ -133,6 +133,12 @@ h4.cols span:first-child{flex:1}
 .mvr .st small{font-size:.64rem}
 .mvr .st strong{font-size:1rem}
 .mvr .fav{flex:none;width:44px;height:44px}
+#mapa.on{display:flex;flex-direction:column;height:100%}
+.mapbox{position:relative;flex:1;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#4b6fd1;touch-action:none}
+#mapin{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#mapimg{display:block;width:6000px;height:3000px;max-width:none;user-select:none;-webkit-user-drag:none}
+.mapctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.mapctl button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -210,6 +216,12 @@ h4.cols span:first-child{flex:1}
     </div>
   </section>
   
+  <section id="mapa">
+    <div class="mapbox" id="mapbox"><div id="mapin"><img id="mapimg" alt="Mapa de Hoenn" draggable="false"></div>
+      <div class="mapctl"><button id="mzi" aria-label="Acercar">+</button><button id="mzo" aria-label="Alejar">−</button><button id="mzr" aria-label="Ver todo">⤢</button></div></div>
+    <p class="hint">Pellizca para ampliar y arrastra para moverte. Doble toque para acercar.</p>
+  </section>
+
   <section id="movs">
     <input id="qm" type="search" placeholder="Buscar ataque por nombre" autocomplete="off" aria-label="Buscar ataque">
     <p class="hint" id="mvhint"></p>
@@ -253,8 +265,8 @@ const sym=m=>m===2?"2":m===.5?"½":m===0?"0":"";
 const chip=(id,x="")=>`<span class="chip" style="background:${INFO[id].c}">${INFO[id].n}${x}</span>`;
 
 // Navegación
-const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
-const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
+const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapa"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
+const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapa"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
 const NAME=Object.fromEntries(SEC);
 let TABS=[],CUR=null;
 const $=id=>document.getElementById(id);
@@ -269,7 +281,7 @@ function renderTabs(){
   $("items").querySelectorAll(".it").forEach(b=>b.classList.toggle("on",b.dataset.s===CUR));}
 function go(id){
   if(!TABS.includes(id))TABS.push(id);
-  CUR=id;renderTabs();show(id);closeMenu();}
+  CUR=id;renderTabs();show(id);closeMenu();if(id==="mapa")initMap();}
 function closeTab(id){
   const i=TABS.indexOf(id);if(i<0)return;
   TABS.splice(i,1);
@@ -466,6 +478,39 @@ document.getElementById("mvout").onclick=e=>{
 };
 renderMov();
 function showMove(id){const m=window.MOVBY[id];$("qm").value=m[1];renderMov();go("movs")}
+
+// Mapa con zoom y desplazamiento
+const MW=6000,MH=3000;let MS={x:0,y:0,s:1,min:.1,ready:false};
+function mapApply(){
+  const b=$("mapbox"),cw=b.clientWidth,ch=b.clientHeight,s=MS.s;
+  const cl=(v,len,c)=>len*s<=c?(c-len*s)/2:Math.min(0,Math.max(c-len*s,v));
+  MS.x=cl(MS.x,MW,cw);MS.y=cl(MS.y,MH,ch);
+  $("mapin").style.transform=`translate(${MS.x}px,${MS.y}px) scale(${s})`;}
+function mapZoom(f,cx,cy){
+  const n=Math.min(1.6,Math.max(MS.min,MS.s*f)),k=n/MS.s;
+  MS.x=cx-(cx-MS.x)*k;MS.y=cy-(cy-MS.y)*k;MS.s=n;mapApply();}
+function mapFit(){const b=$("mapbox");MS.min=Math.min(b.clientWidth/MW,b.clientHeight/MH);MS.s=MS.min;MS.x=MS.y=0;mapApply();}
+function initMap(){
+  if(MS.ready){mapApply();return}
+  MS.ready=true;const img=$("mapimg"),b=$("mapbox");
+  img.src="mapa-hoenn.webp";
+  mapFit();
+  const P=new Map();let d0=0,last=0;
+  const pos=e=>{const r=b.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  b.addEventListener("pointerdown",e=>{b.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));
+    if(P.size===2){const[a,c]=[...P.values()];d0=Math.hypot(a[0]-c[0],a[1]-c[1])}
+    if(P.size===1){const t=Date.now();if(t-last<300){const[x,y]=pos(e);mapZoom(2,x,y)}last=t}});
+  b.addEventListener("pointermove",e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId),n=pos(e);
+    if(P.size===1){MS.x+=n[0]-o[0];MS.y+=n[1]-o[1];P.set(e.pointerId,n);mapApply()}
+    else if(P.size===2){P.set(e.pointerId,n);const[a,c]=[...P.values()],d=Math.hypot(a[0]-c[0],a[1]-c[1]);
+      if(d0)mapZoom(d/d0,(a[0]+c[0])/2,(a[1]+c[1])/2);d0=d}});
+  const up=e=>{P.delete(e.pointerId);d0=0};
+  b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);
+  b.addEventListener("wheel",e=>{e.preventDefault();const[x,y]=pos(e);mapZoom(e.deltaY<0?1.25:.8,x,y)},{passive:false});
+  const c=()=>[b.clientWidth/2,b.clientHeight/2];
+  $("mzi").onclick=()=>mapZoom(1.6,...c());$("mzo").onclick=()=>mapZoom(1/1.6,...c());$("mzr").onclick=mapFit;
+  window.addEventListener("resize",()=>{if($("mapa").classList.contains("on"))mapApply()});
+}
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
