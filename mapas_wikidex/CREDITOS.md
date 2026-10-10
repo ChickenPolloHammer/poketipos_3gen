@@ -117,3 +117,42 @@ Imágenes obtenidas de [WikiDex](https://www.wikidex.net), bajo licencia [CC BY-
 | Ruta 134 - Cueva submarina.png | rutas | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ARuta_134_-_Cueva_submarina.png |
 | Ruta 134 - Submarina.png | rutas | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ARuta_134_-_Submarina.png |
 | Ruta 134.png | rutas | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ARuta_134.png |
+| Bosque Petalia.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ABosque_Petalia.png |
+| Casa Treta 1.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_1.png |
+| Casa Treta 2.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_2.png |
+| Casa Treta 3.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_3.png |
+| Casa Treta 4.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_4.png |
+| Casa Treta 5 exclamación.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_5_exclamaci%C3%B3n.png |
+| Casa Treta 5.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_5.png |
+| Casa Treta 6.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_6.png |
+| Casa Treta 7.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_7.png |
+| Casa Treta 8.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta_8.png |
+| Casa Treta.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_Treta.png |
+| Casa bayologo.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ACasa_bayologo.png |
+| Desierto.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ADesierto.png |
+| Entrada Cueva Ancestral.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AEntrada_Cueva_Ancestral.png |
+| Frente Batalla.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AFrente_Batalla.png |
+| Guarida Aqua.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AGuarida_Aqua.png |
+| Isla Espejismo.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AIsla_Espejismo.png |
+| Isla Origen E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AIsla_Origen_E.png |
+| Isla Suprema Esmeralda (bosque).png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AIsla_Suprema_Esmeralda_%28bosque%29.png |
+| Isla Suprema Esmeralda (entrada).png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AIsla_Suprema_Esmeralda_%28entrada%29.png |
+| Monte Cenizo.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMonte_Cenizo.png |
+| Museo Oceánico RZE.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMuseo_Oce%C3%A1nico_RZE.png |
+| Museo Oceánico planta alta RZE.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMuseo_Oce%C3%A1nico_planta_alta_RZE.png |
+| Museo Oceánico planta baja RZE.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMuseo_Oce%C3%A1nico_planta_baja_RZE.png |
+| Museo ciudad calagua 1º piso.PNG | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMuseo_ciudad_calagua_1%C2%BA_piso.PNG |
+| Museo ciudad calagua 2º piso.PNG | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AMuseo_ciudad_calagua_2%C2%BA_piso.PNG |
+| Pilar celeste cima.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3APilar_celeste_cima.png |
+| Roca Ombligo E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ARoca_Ombligo_E.png |
+| S.S. Marea E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AS.S._Marea_E.png |
+| T Espejismo Ruta 111.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AT_Espejismo_Ruta_111.png |
+| Torre Batalla RZ.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATorre_Batalla_RZ.png |
+| Torre Espejismo P1 E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATorre_Espejismo_P1_E.png |
+| Torre Espejismo P2 E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATorre_Espejismo_P2_E.png |
+| Torre Espejismo P3 E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATorre_Espejismo_P3_E.png |
+| Torre Espejismo PB E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATorre_Espejismo_PB_E.png |
+| Tumba Antigua.jpg | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3ATumba_Antigua.jpg |
+| Zona Safari (Hoenn) E.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AZona_Safari_%28Hoenn%29_E.png |
+| Zona Safari (Hoenn) RZ.png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AZona_Safari_%28Hoenn%29_RZ.png |
+| Zona Safari (Hoenn).png | otros | CC BY-SA 3.0 | https://www.wikidex.net/wiki/Archivo%3AZona_Safari_%28Hoenn%29.png |
