@@ -148,6 +148,11 @@ h4.cols span:first-child{flex:1}
 .mbar b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mbar button{flex:none;width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700;cursor:pointer}
 .pl .tg{flex:none;color:var(--mute);font-size:.75rem}
+.mnav{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mnav[hidden]{display:none}
+.mnav button{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:.9rem;font-family:inherit;cursor:pointer}
+.mnav button:disabled{opacity:.45;cursor:default}
+.mnav .ar{color:var(--acc);margin-right:6px;font-weight:800}
 </style>
 </head>
 <body>
@@ -237,6 +242,7 @@ h4.cols span:first-child{flex:1}
       <div class="mbar"><button id="mback" aria-label="Volver a la lista">←</button><b id="mname"></b><button id="mprev" aria-label="Anterior">‹</button><button id="mnext" aria-label="Siguiente">›</button></div>
       <div class="mapbox" id="mapbox"><div id="mapin"><img id="mapimg" alt="" draggable="false"></div>
         <div class="mapctl"><button id="mzi" aria-label="Acercar">+</button><button id="mzo" aria-label="Alejar">−</button><button id="mzr" aria-label="Ver todo">⤢</button></div></div>
+      <div class="mnav" id="mnav" hidden></div>
     </div>
   </section>
 
@@ -511,7 +517,7 @@ async function initPlaces(){
     }catch(e){PL=[REGION];PERR=true}
     $("pg").innerHTML=[["","Todos"],...Object.entries(GRUPOS)].map(([k,t])=>`<button class="chip${k===PG?" sel":""}" data-g="${k}" style="background:#4a6b5a">${t}</button>`).join("");
   }
-  renderPlaces();
+  linkKeys();renderPlaces();
 }
 function renderPlaces(){
   if(!PL||!PL.length)return;
@@ -520,14 +526,39 @@ function renderPlaces(){
   $("phint").textContent=(PLIST.length?PLIST.length+" mapa"+(PLIST.length>1?"s":""):"Sin resultados.")+(PERR?" · Faltan los mapas de WikiDex: sube la carpeta mapas_wikidex junto a index.html.":"");
   $("pout").innerHTML=PLIST.map((p,i)=>`<button class="mr pl" data-i="${i}"><span class="mn">${p.n}</span><span class="tg">${SING[p.g]||p.g}</span></button>`).join("");
 }
-function openPlace(i){
-  if(i<0||i>=PLIST.length)return;
-  PI=i;const p=PLIST[i],img=$("mapimg");
+function openPlace(i){if(i>=0&&i<PLIST.length)openItem(PLIST[i])}
+function openItem(p){
+  PI=PLIST.indexOf(p);const img=$("mapimg");
   $("mlist").hidden=true;$("mview").hidden=false;$("mname").textContent=p.n;img.alt=p.n;
   img.onload=()=>{MS.w=img.naturalWidth;MS.h=img.naturalHeight;img.style.width=MS.w+"px";img.style.height=MS.h+"px";mapFit()};
   img.style.imageRendering=p.px===false?"auto":"pixelated";MS.max=p.px===false?2:8;
   img.src=p.u||MBASE+p.f.split("/").map(encodeURIComponent).join("/");
-  $("mprev").disabled=i===0;$("mnext").disabled=i===PLIST.length-1;
+  $("mprev").disabled=PI<=0;$("mnext").disabled=PI<0||PI>=PLIST.length-1;
+  renderNav(p);
+}
+// Conexiones entre mapas exteriores (datos de pret/pokeemerald; u=arriba d=abajo l=izquierda r=derecha)
+const ADJ={"ROUTE106":[["u","ROUTE105"],["d","DEWFORD_TOWN"]],"ROUTE124":[["d","ROUTE126"],["l","LILYCOVE_CITY"],["r","ROUTE125"],["r","MOSSDEEP_CITY"]],"ROUTE119":[["d","ROUTE118"],["r","FORTREE_CITY"]],"ROUTE121":[["d","ROUTE122"],["l","ROUTE120"],["r","LILYCOVE_CITY"]],"ROUTE114":[["l","ROUTE115"],["r","FALLARBOR_TOWN"]],"ROUTE127":[["u","MOSSDEEP_CITY"],["d","ROUTE128"],["l","ROUTE126"]],"MOSSDEEP_CITY":[["u","ROUTE125"],["d","ROUTE127"],["l","ROUTE124"]],"EVER_GRANDE_CITY":[["l","ROUTE128"]],"OLDALE_TOWN":[["u","ROUTE103"],["d","ROUTE101"],["l","ROUTE102"]],"LILYCOVE_CITY":[["l","ROUTE121"],["r","ROUTE124"]],"FORTREE_CITY":[["l","ROUTE119"],["r","ROUTE120"]],"ROUTE134":[["l","SLATEPORT_CITY"],["r","ROUTE133"]],"ROUTE125":[["d","MOSSDEEP_CITY"],["l","ROUTE124"]],"ROUTE131":[["l","PACIFIDLOG_TOWN"],["r","ROUTE130"]],"LITTLEROOT_TOWN":[["u","ROUTE101"]],"ROUTE109":[["u","SLATEPORT_CITY"],["l","ROUTE108"]],"ROUTE115":[["d","RUSTBORO_CITY"],["r","ROUTE114"]],"ROUTE117":[["l","VERDANTURF_TOWN"],["r","MAUVILLE_CITY"]],"ROUTE110":[["u","MAUVILLE_CITY"],["d","SLATEPORT_CITY"],["l","ROUTE103"]],"ROUTE128":[["u","ROUTE127"],["d","ROUTE129"],["r","EVER_GRANDE_CITY"]],"ROUTE113":[["d","ROUTE112"],["l","FALLARBOR_TOWN"],["r","ROUTE111"]],"LAVARIDGE_TOWN":[["r","ROUTE112"]],"FALLARBOR_TOWN":[["l","ROUTE114"],["r","ROUTE113"]],"ROUTE101":[["u","OLDALE_TOWN"],["d","LITTLEROOT_TOWN"]],"VERDANTURF_TOWN":[["u","ROUTE116"],["r","ROUTE117"]],"PETALBURG_CITY":[["l","ROUTE104"],["r","ROUTE102"]],"SLATEPORT_CITY":[["u","ROUTE110"],["d","ROUTE109"],["r","ROUTE134"]],"ROUTE102":[["l","PETALBURG_CITY"],["r","OLDALE_TOWN"]],"ROUTE116":[["d","VERDANTURF_TOWN"],["l","RUSTBORO_CITY"]],"ROUTE108":[["l","ROUTE107"],["r","ROUTE109"]],"ROUTE111":[["d","MAUVILLE_CITY"],["l","ROUTE113"],["l","ROUTE112"]],"ROUTE126":[["u","ROUTE124"],["r","ROUTE127"]],"ROUTE118":[["u","ROUTE119"],["l","MAUVILLE_CITY"],["r","ROUTE123"]],"ROUTE105":[["u","ROUTE104"],["d","ROUTE106"]],"ROUTE103":[["d","OLDALE_TOWN"],["r","ROUTE110"]],"ROUTE123":[["u","ROUTE122"],["l","ROUTE118"]],"ROUTE120":[["l","FORTREE_CITY"],["r","ROUTE121"]],"ROUTE104":[["u","RUSTBORO_CITY"],["d","ROUTE105"],["r","PETALBURG_CITY"]],"PACIFIDLOG_TOWN":[["l","ROUTE132"],["r","ROUTE131"]],"RUSTBORO_CITY":[["u","ROUTE115"],["d","ROUTE104"],["r","ROUTE116"]],"ROUTE112":[["u","ROUTE113"],["l","LAVARIDGE_TOWN"],["r","ROUTE111"]],"ROUTE129":[["u","ROUTE128"],["l","ROUTE130"]],"ROUTE132":[["l","ROUTE133"],["r","PACIFIDLOG_TOWN"]],"MAUVILLE_CITY":[["u","ROUTE111"],["d","ROUTE110"],["l","ROUTE117"],["r","ROUTE118"]],"ROUTE122":[["u","ROUTE121"],["d","ROUTE123"]],"ROUTE130":[["l","ROUTE131"],["r","ROUTE129"]],"ROUTE107":[["l","DEWFORD_TOWN"],["r","ROUTE108"]],"ROUTE133":[["l","ROUTE134"],["r","ROUTE132"]],"DEWFORD_TOWN":[["u","ROUTE106"],["r","ROUTE107"]]};
+const NOM={"LITTLEROOT_TOWN":"Villa Raíz","OLDALE_TOWN":"Pueblo Escaso","PETALBURG_CITY":"Ciudad Petalia","RUSTBORO_CITY":"Ciudad Férrica","DEWFORD_TOWN":"Pueblo Oromar","SLATEPORT_CITY":"Ciudad Portual","MAUVILLE_CITY":"Ciudad Malvalona","VERDANTURF_TOWN":"Pueblo Verdegal","FALLARBOR_TOWN":"Pueblo Pardal","LAVARIDGE_TOWN":"Pueblo Lavacalda","FORTREE_CITY":"Ciudad Arborada","LILYCOVE_CITY":"Ciudad Calagua","MOSSDEEP_CITY":"Ciudad Algaria","PACIFIDLOG_TOWN":"Pueblo Azuliza","EVER_GRANDE_CITY":"Ciudad Colosalia","ROUTE120":"Ruta 120","ROUTE132":"Ruta 132","ROUTE107":"Ruta 107","ROUTE116":"Ruta 116","ROUTE101":"Ruta 101","ROUTE134":"Ruta 134","ROUTE123":"Ruta 123","ROUTE111":"Ruta 111","ROUTE126":"Ruta 126","ROUTE103":"Ruta 103","ROUTE108":"Ruta 108","ROUTE113":"Ruta 113","ROUTE102":"Ruta 102","ROUTE106":"Ruta 106","ROUTE133":"Ruta 133","ROUTE121":"Ruta 121","ROUTE127":"Ruta 127","ROUTE114":"Ruta 114","ROUTE119":"Ruta 119","ROUTE109":"Ruta 109","ROUTE118":"Ruta 118","ROUTE131":"Ruta 131","ROUTE129":"Ruta 129","ROUTE105":"Ruta 105","ROUTE125":"Ruta 125","ROUTE122":"Ruta 122","ROUTE128":"Ruta 128","ROUTE104":"Ruta 104","ROUTE112":"Ruta 112","ROUTE124":"Ruta 124","ROUTE130":"Ruta 130","ROUTE115":"Ruta 115","ROUTE117":"Ruta 117","ROUTE110":"Ruta 110"};
+const FLE={u:"↑",l:"←",r:"→",d:"↓"},ORD="ulrd";
+let PK=null;
+function placeFor(key){
+  if(!PL||!NOM[key])return null;
+  const r=/^ROUTE(\d+)$/.exec(key);let c;
+  if(r){const re=new RegExp("^Ruta "+r[1]+"(?!\\d)");c=PL.filter(p=>p.g==="rutas"&&re.test(p.n)&&!/submarina/i.test(p.n))}
+  else{const b=norm(NOM[key]);c=PL.filter(p=>p.g==="ciudades"&&norm(p.n).startsWith(b))}
+  const sc=p=>(/esmeralda|\be$/i.test(p.n)?2:0)-(/\brz\b/i.test(p.n)?1:0)-p.n.length/1000;
+  return c.sort((a,b)=>sc(b)-sc(a))[0]||null;
+}
+function linkKeys(){
+  if(PK)return;PK={};
+  for(const k in ADJ){const p=placeFor(k);PK[k]=p;if(p&&!p.k)p.k=k}
+}
+function renderNav(p){
+  const n=$("mnav"),a=p.k&&ADJ[p.k];
+  if(!a){n.hidden=true;n.innerHTML="";return}
+  n.hidden=false;
+  n.innerHTML=[...a].sort((x,y)=>ORD.indexOf(x[0])-ORD.indexOf(y[0])).map(([d,k])=>
+    `<button data-k="${k}"${PK[k]?"":" disabled"}><span class="ar">${FLE[d]}</span>${NOM[k]}</button>`).join("");
 }
 function mapApply(){
   const b=$("mapbox"),cw=b.clientWidth,ch=b.clientHeight,s=MS.s;
@@ -546,6 +577,7 @@ function initViewer(){
     $("pg").querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x.dataset.g===PG));renderPlaces()};
   $("pout").onclick=e=>{const c=e.target.closest(".pl");if(c)openPlace(+c.dataset.i)};
   $("mback").onclick=()=>{$("mview").hidden=true;$("mlist").hidden=false};
+  $("mnav").onclick=e=>{const b=e.target.closest("button");if(!b)return;const t=PK&&PK[b.dataset.k];if(t)openItem(t)};
   $("mprev").onclick=()=>openPlace(PI-1);$("mnext").onclick=()=>openPlace(PI+1);
   const pos=e=>{const r=b.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
   b.addEventListener("pointerdown",e=>{b.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));
