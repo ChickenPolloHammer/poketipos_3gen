@@ -136,9 +136,18 @@ h4.cols span:first-child{flex:1}
 #mapa.on{display:flex;flex-direction:column;height:100%}
 .mapbox{position:relative;flex:1;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#4b6fd1;touch-action:none}
 #mapin{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-#mapimg{display:block;width:6000px;height:3000px;max-width:none;user-select:none;-webkit-user-drag:none}
+#mapimg{display:block;max-width:none;image-rendering:pixelated;user-select:none;-webkit-user-drag:none}
 .mapctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
 .mapctl button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700;cursor:pointer}
+#qp{width:100%;min-height:48px;padding:0 14px;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:12px;margin:6px 0}
+#qp:focus{border-color:var(--acc);outline:none}
+#mlist{flex:1;min-height:0;overflow-y:auto}
+#mview{flex:1;display:flex;flex-direction:column;min-height:0}
+#mview[hidden]{display:none}
+.mbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mbar b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbar button{flex:none;width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700;cursor:pointer}
+.pl .tg{flex:none;color:var(--mute);font-size:.75rem}
 </style>
 </head>
 <body>
@@ -217,9 +226,18 @@ h4.cols span:first-child{flex:1}
   </section>
   
   <section id="mapa">
-    <div class="mapbox" id="mapbox"><div id="mapin"><img id="mapimg" alt="Mapa de Hoenn" draggable="false"></div>
-      <div class="mapctl"><button id="mzi" aria-label="Acercar">+</button><button id="mzo" aria-label="Alejar">−</button><button id="mzr" aria-label="Ver todo">⤢</button></div></div>
-    <p class="hint">Pellizca para ampliar y arrastra para moverte. Doble toque para acercar.</p>
+    <div id="mlist">
+      <input id="qp" type="search" placeholder="Buscar ruta, ciudad o cueva" autocomplete="off" aria-label="Buscar lugar">
+      <div class="tf" id="pg" role="group" aria-label="Tipo de lugar"></div>
+      <p class="hint" id="phint"></p>
+      <div id="pout"></div>
+      <p class="hint">Mapas: <a href="https://www.wikidex.net" target="_blank" rel="noopener">WikiDex</a> (CC BY-SA 3.0). Créditos en mapas_wikidex/CREDITOS.md.</p>
+    </div>
+    <div id="mview" hidden>
+      <div class="mbar"><button id="mback" aria-label="Volver a la lista">←</button><b id="mname"></b><button id="mprev" aria-label="Anterior">‹</button><button id="mnext" aria-label="Siguiente">›</button></div>
+      <div class="mapbox" id="mapbox"><div id="mapin"><img id="mapimg" alt="" draggable="false"></div>
+        <div class="mapctl"><button id="mzi" aria-label="Acercar">+</button><button id="mzo" aria-label="Alejar">−</button><button id="mzr" aria-label="Ver todo">⤢</button></div></div>
+    </div>
   </section>
 
   <section id="movs">
@@ -265,8 +283,8 @@ const sym=m=>m===2?"2":m===.5?"½":m===0?"0":"";
 const chip=(id,x="")=>`<span class="chip" style="background:${INFO[id].c}">${INFO[id].n}${x}</span>`;
 
 // Navegación
-const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapa"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
-const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapa"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
+const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
+const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
 const NAME=Object.fromEntries(SEC);
 let TABS=[],CUR=null;
 const $=id=>document.getElementById(id);
@@ -281,7 +299,7 @@ function renderTabs(){
   $("items").querySelectorAll(".it").forEach(b=>b.classList.toggle("on",b.dataset.s===CUR));}
 function go(id){
   if(!TABS.includes(id))TABS.push(id);
-  CUR=id;renderTabs();show(id);closeMenu();if(id==="mapa")initMap();}
+  CUR=id;renderTabs();show(id);closeMenu();if(id==="mapa")initPlaces();}
 function closeTab(id){
   const i=TABS.indexOf(id);if(i<0)return;
   TABS.splice(i,1);
@@ -479,23 +497,56 @@ document.getElementById("mvout").onclick=e=>{
 renderMov();
 function showMove(id){const m=window.MOVBY[id];$("qm").value=m[1];renderMov();go("movs")}
 
-// Mapa con zoom y desplazamiento
-const MW=6000,MH=3000;let MS={x:0,y:0,s:1,min:.1,ready:false};
+// Lugares: mapas por ruta, ciudad y cueva (carpeta mapas_wikidex)
+const MBASE="mapas_wikidex/",GRUPOS={region:"Región",rutas:"Rutas",ciudades:"Ciudades",cuevas:"Cuevas"},SING={region:"Región",rutas:"Ruta",ciudades:"Ciudad",cuevas:"Cueva"},
+REGION={g:"region",n:"Región completa",u:"mapa-hoenn-completo.png",px:false};
+let PERR=false;
+let PL=null,PG="",PLIST=[],PI=-1,MS={x:0,y:0,s:1,min:.1,max:8,w:1,h:1,ready:false};
+async function initPlaces(){
+  if(!MS.ready)initViewer();
+  if(PL===null){
+    try{const r=await fetch(MBASE+"indice.json");if(!r.ok)throw 0;
+      PL=[REGION,...(await r.json()).filter(f=>/\.(png|gif|webp|jpe?g)$/i.test(f)).map(f=>{const i=f.indexOf("/");return{f,g:f.slice(0,i),n:f.slice(i+1).replace(/\.[^.]+$/,"")}})
+        .sort((a,b)=>a.g.localeCompare(b.g)||a.n.localeCompare(b.n,"es",{numeric:true}))];
+    }catch(e){PL=[REGION];PERR=true}
+    $("pg").innerHTML=[["","Todos"],...Object.entries(GRUPOS)].map(([k,t])=>`<button class="chip${k===PG?" sel":""}" data-g="${k}" style="background:#4a6b5a">${t}</button>`).join("");
+  }
+  renderPlaces();
+}
+function renderPlaces(){
+  if(!PL||!PL.length)return;
+  const q=norm($("qp").value);
+  PLIST=PL.filter(p=>(!PG||p.g===PG)&&(!q||norm(p.n).includes(q)));
+  $("phint").textContent=(PLIST.length?PLIST.length+" mapa"+(PLIST.length>1?"s":""):"Sin resultados.")+(PERR?" · Faltan los mapas de WikiDex: sube la carpeta mapas_wikidex junto a index.html.":"");
+  $("pout").innerHTML=PLIST.map((p,i)=>`<button class="mr pl" data-i="${i}"><span class="mn">${p.n}</span><span class="tg">${SING[p.g]||p.g}</span></button>`).join("");
+}
+function openPlace(i){
+  if(i<0||i>=PLIST.length)return;
+  PI=i;const p=PLIST[i],img=$("mapimg");
+  $("mlist").hidden=true;$("mview").hidden=false;$("mname").textContent=p.n;img.alt=p.n;
+  img.onload=()=>{MS.w=img.naturalWidth;MS.h=img.naturalHeight;img.style.width=MS.w+"px";img.style.height=MS.h+"px";mapFit()};
+  img.style.imageRendering=p.px===false?"auto":"pixelated";MS.max=p.px===false?2:8;
+  img.src=p.u||MBASE+p.f.split("/").map(encodeURIComponent).join("/");
+  $("mprev").disabled=i===0;$("mnext").disabled=i===PLIST.length-1;
+}
 function mapApply(){
   const b=$("mapbox"),cw=b.clientWidth,ch=b.clientHeight,s=MS.s;
   const cl=(v,len,c)=>len*s<=c?(c-len*s)/2:Math.min(0,Math.max(c-len*s,v));
-  MS.x=cl(MS.x,MW,cw);MS.y=cl(MS.y,MH,ch);
+  MS.x=cl(MS.x,MS.w,cw);MS.y=cl(MS.y,MS.h,ch);
   $("mapin").style.transform=`translate(${MS.x}px,${MS.y}px) scale(${s})`;}
 function mapZoom(f,cx,cy){
-  const n=Math.min(1.6,Math.max(MS.min,MS.s*f)),k=n/MS.s;
+  const n=Math.min(MS.max,Math.max(MS.min,MS.s*f)),k=n/MS.s;
   MS.x=cx-(cx-MS.x)*k;MS.y=cy-(cy-MS.y)*k;MS.s=n;mapApply();}
-function mapFit(){const b=$("mapbox");MS.min=Math.min(b.clientWidth/MW,b.clientHeight/MH);MS.s=MS.min;MS.x=MS.y=0;mapApply();}
-function initMap(){
-  if(MS.ready){mapApply();return}
-  MS.ready=true;const img=$("mapimg"),b=$("mapbox");
-  img.src="mapa-hoenn.webp";
-  mapFit();
-  const P=new Map();let d0=0,last=0;
+function mapFit(){const b=$("mapbox"),cw=b.clientWidth,ch=b.clientHeight;
+  MS.min=Math.min(cw/MS.w,ch/MS.h);MS.s=Math.max(MS.min,Math.min(cw/MS.w,3));MS.x=MS.y=0;mapApply();}
+function initViewer(){
+  MS.ready=true;const b=$("mapbox"),P=new Map();let d0=0,last=0;
+  $("qp").oninput=renderPlaces;
+  $("pg").onclick=e=>{const c=e.target.closest("button");if(!c)return;PG=c.dataset.g;
+    $("pg").querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x.dataset.g===PG));renderPlaces()};
+  $("pout").onclick=e=>{const c=e.target.closest(".pl");if(c)openPlace(+c.dataset.i)};
+  $("mback").onclick=()=>{$("mview").hidden=true;$("mlist").hidden=false};
+  $("mprev").onclick=()=>openPlace(PI-1);$("mnext").onclick=()=>openPlace(PI+1);
   const pos=e=>{const r=b.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
   b.addEventListener("pointerdown",e=>{b.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));
     if(P.size===2){const[a,c]=[...P.values()];d0=Math.hypot(a[0]-c[0],a[1]-c[1])}
@@ -509,7 +560,7 @@ function initMap(){
   b.addEventListener("wheel",e=>{e.preventDefault();const[x,y]=pos(e);mapZoom(e.deltaY<0?1.25:.8,x,y)},{passive:false});
   const c=()=>[b.clientWidth/2,b.clientHeight/2];
   $("mzi").onclick=()=>mapZoom(1.6,...c());$("mzo").onclick=()=>mapZoom(1/1.6,...c());$("mzr").onclick=mapFit;
-  window.addEventListener("resize",()=>{if($("mapa").classList.contains("on"))mapApply()});
+  window.addEventListener("resize",()=>{if($("mapa").classList.contains("on")&&!$("mview").hidden)mapApply()});
 }
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
