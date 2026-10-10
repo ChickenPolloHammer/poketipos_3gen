@@ -498,7 +498,7 @@ renderMov();
 function showMove(id){const m=window.MOVBY[id];$("qm").value=m[1];renderMov();go("movs")}
 
 // Lugares: mapas por ruta, ciudad y cueva (carpeta mapas_wikidex)
-const MBASE="mapas_wikidex/",GRUPOS={region:"Región",rutas:"Rutas",ciudades:"Ciudades",cuevas:"Cuevas"},SING={region:"Región",rutas:"Ruta",ciudades:"Ciudad",cuevas:"Cueva"},
+const MBASE="mapas_wikidex/",GRUPOS={region:"Región",rutas:"Rutas",ciudades:"Ciudades",cuevas:"Cuevas",otros:"Otros"},SING={region:"Región",rutas:"Ruta",ciudades:"Ciudad",cuevas:"Cueva",otros:"Lugar"},
 REGION={g:"region",n:"Región completa",u:"mapa-hoenn-completo.png",px:false};
 let PERR=false;
 let PL=null,PG="",PLIST=[],PI=-1,MS={x:0,y:0,s:1,min:.1,max:8,w:1,h:1,ready:false};
