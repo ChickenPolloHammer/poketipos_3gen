@@ -153,6 +153,15 @@ h4.cols span:first-child{flex:1}
 .mnav button{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:.9rem;font-family:inherit;cursor:pointer}
 .mnav button:disabled{opacity:.45;cursor:default}
 .mnav .ar{color:var(--acc);margin-right:6px;font-weight:800}
+.gbar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+#gfill{height:100%;width:0;background:var(--acc);transition:width .2s}
+.gym.got{opacity:.6}
+.gh{display:flex;align-items:center;gap:10px}
+.gchk{flex:none;width:48px;height:48px;border-radius:50%;border:2px solid var(--line);background:none;color:var(--mute);font-weight:800;font-size:1.1rem;font-family:inherit;cursor:pointer}
+.gym.got .gchk{background:var(--acc);border-color:var(--acc);color:#fff}
+.gi{flex:1;min-width:0}.gi b{display:block}.gi small{color:var(--mute);font-size:.82rem}
+.gym .chip{flex:none;min-height:36px;font-size:.8rem;cursor:pointer}
+.gmap{margin-top:10px;width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--acc);font-weight:600;font-family:inherit;cursor:pointer}
 </style>
 </head>
 <body>
@@ -246,6 +255,14 @@ h4.cols span:first-child{flex:1}
     </div>
   </section>
 
+  <section id="gym">
+    <div class="card"><h3>Medallas <span id="gcount"></span></h3><div class="gbar"><div id="gfill"></div></div></div>
+    <div class="tf" id="gf" role="group" aria-label="Filtrar gimnasios"></div>
+    <div id="gout"></div>
+    <p class="hint" id="gmsg" aria-live="polite"></p>
+    <p class="hint"><button class="lsb" id="greset">Reiniciar medallas</button></p>
+  </section>
+
   <section id="movs">
     <input id="qm" type="search" placeholder="Buscar ataque por nombre" autocomplete="off" aria-label="Buscar ataque">
     <p class="hint" id="mvhint"></p>
@@ -289,8 +306,8 @@ const sym=m=>m===2?"2":m===.5?"½":m===0?"0":"";
 const chip=(id,x="")=>`<span class="chip" style="background:${INFO[id].c}">${INFO[id].n}${x}</span>`;
 
 // Navegación
-const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
-const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
+const SEC=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["gym","Gimnasios"],["atacante","Tipos · Ataque"],["defensor","Tipos · Defensa"],["tabla","Tipos · Tabla"]];
+const MENU=[["dex","Pokédex"],["movs","Movimientos"],["logica","Lógica combate"],["mapa","Mapas"],["gym","Gimnasios"],["","Tipos"],["atacante","Ataque",1],["defensor","Defensa",1],["tabla","Tabla",1]];
 const NAME=Object.fromEntries(SEC);
 let TABS=[],CUR=null;
 const $=id=>document.getElementById(id);
@@ -594,6 +611,32 @@ function initViewer(){
   $("mzi").onclick=()=>mapZoom(1.6,...c());$("mzo").onclick=()=>mapZoom(1/1.6,...c());$("mzr").onclick=mapFit;
   window.addEventListener("resize",()=>{if($("mapa").classList.contains("on")&&!$("mview").hidden)mapApply()});
 }
+// Gimnasios y medallas de Esmeralda
+const GYMS=[["Medalla Piedra","Ciudad Férrica","Petra","roc"],["Medalla Puño","Pueblo Oromar","Marcial","luc"],["Medalla Dinamo","Ciudad Malvalona","Erico","ele"],["Medalla Calor","Pueblo Lavacalda","Candela","fue"],["Medalla Equilibrio","Ciudad Petalia","Norman","nor"],["Medalla Pluma","Ciudad Arborada","Alana","vol"],["Medalla Mente","Ciudad Algaria","Vito y Leti","psi"],["Medalla Lluvia","Arrecípolis","Galano","agu"]];
+const GKEY="tipos-esmeralda-medallas";let GOT=[],GF="all";
+try{GOT=JSON.parse(localStorage.getItem(GKEY)||"[]")}catch(e){}
+const saveG=()=>{try{localStorage.setItem(GKEY,JSON.stringify(GOT))}catch(e){}};
+function renderGyms(){
+  $("gcount").textContent=GOT.length+" / "+GYMS.length;$("gfill").style.width=GOT.length/GYMS.length*100+"%";
+  $("gf").innerHTML=[["all","Todos"],["pend","Pendientes"]].map(([k,t])=>`<button class="chip${k===GF?" sel":""}" data-f="${k}" style="background:#4a6b5a">${t}</button>`).join("");
+  const l=GYMS.map((g,i)=>[g,i]).filter(([g,i])=>GF==="all"||!GOT.includes(i));
+  $("gout").innerHTML=l.length?l.map(([g,i])=>{const got=GOT.includes(i),t=INFO[g[3]];
+    return `<div class="card gym${got?" got":""}" data-i="${i}"><div class="gh"><button class="gchk" data-c="1" aria-pressed="${got}" aria-label="${g[0]} ${got?"conseguida":"pendiente"}">${got?"✓":i+1}</button>
+    <div class="gi"><b>${g[0]}</b><small>${g[1]} · ${g[2]}</small></div><button class="chip" data-t="${g[3]}" style="background:${t.c}">${t.n}</button></div>
+    <button class="gmap" data-m="1">Ver mapa de ${g[1]}</button></div>`}).join(""):'<p class="none">¡Tienes las 8 medallas!</p>';
+}
+$("gf").onclick=e=>{const b=e.target.closest("button");if(b){GF=b.dataset.f;renderGyms()}};
+$("gout").onclick=async e=>{
+  const c=e.target.closest(".gym");if(!c)return;const i=+c.dataset.i;$("gmsg").textContent="";
+  if(e.target.closest("[data-c]")){GOT=GOT.includes(i)?GOT.filter(x=>x!==i):[...GOT,i];saveG();renderGyms()}
+  else if(e.target.closest("[data-t]")){S=[GYMS[i][3]];markD();renderD();go("defensor")}
+  else if(e.target.closest("[data-m]")){
+    await initPlaces();const b=norm(GYMS[i][1]);
+    const p=(PL||[]).filter(x=>x.g==="ciudades"&&norm(x.n).startsWith(b)).sort((x,y)=>(/esmeralda|\be$/i.test(y.n)?1:0)-(/esmeralda|\be$/i.test(x.n)?1:0))[0];
+    if(p){go("mapa");openItem(p)}else $("gmsg").textContent="No encuentro el mapa de "+GYMS[i][1]+" en la carpeta mapas_wikidex."}
+};
+$("greset").onclick=()=>{if(GOT.length&&confirm("¿Borrar todas las medallas marcadas?")){GOT=[];saveG();renderGyms()}};
+renderGyms();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
