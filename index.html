@@ -163,6 +163,11 @@ h4.cols span:first-child{flex:1}
 .gi{flex:1;min-width:0}.gi b{display:block}.gi small{color:var(--mute);font-size:.82rem}
 .gym .chip{flex:none;min-height:36px;font-size:.8rem;cursor:pointer}
 .gmap{margin-top:10px;width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--acc);font-weight:600;font-family:inherit;cursor:pointer}
+.tab{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;position:relative}
+.tab .tl{cursor:grab}
+.tab.shift{transition:transform .15s}
+.tab.drag{z-index:5;box-shadow:0 6px 16px rgba(0,0,0,.35);cursor:grabbing}
+body.dragging,body.dragging *{cursor:grabbing!important}
 </style>
 </head>
 <body>
@@ -330,6 +335,7 @@ function closeTab(id){
   if(CUR===id){CUR=TABS[i]||TABS[i-1]||null;show(CUR)}
   renderTabs();}
 $("tabs").onclick=e=>{
+  if(window.__sup)return;
   const t=e.target.closest(".tab");if(!t)return;
   if(e.target.closest(".tx"))closeTab(t.dataset.s);else go(t.dataset.s);};
 // Menú
@@ -640,6 +646,50 @@ $("gout").onclick=async e=>{
 };
 $("greset").onclick=()=>{if(GOT.length&&confirm("¿Borrar todas las medallas marcadas?")){GOT=[];saveG();renderGyms()}};
 renderGyms();
+// Reordenar pestañas: mantener pulsado (móvil) o arrastrar con el ratón (PC)
+(function(){
+  const nav=$("tabs");let D=null;
+  const tabs=()=>[...nav.querySelectorAll(".tab")];
+  const reset=()=>{if(D)clearTimeout(D.t);tabs().forEach(x=>{x.style.transform="";x.classList.remove("drag","shift")});document.body.classList.remove("dragging");D=null};
+  const activate=()=>{
+    D.on=true;D.ni=D.i;D.el.classList.add("drag");tabs().forEach(x=>{if(x!==D.el)x.classList.add("shift")});
+    document.body.classList.add("dragging");if(navigator.vibrate)navigator.vibrate(15);
+    D.rects=tabs().map(x=>{const r=x.getBoundingClientRect();return{l:r.left,w:r.width}});D.s0=nav.scrollLeft;
+    try{nav.setPointerCapture(D.id)}catch(e){}
+  };
+  nav.addEventListener("pointerdown",e=>{
+    if(e.button>0||e.target.closest(".tx"))return;const el=e.target.closest(".tab");if(!el)return;
+    D={el,i:tabs().indexOf(el),id:e.pointerId,x:e.clientX,y:e.clientY,on:false,touch:(e.pointerType||"mouse")!=="mouse"};
+    if(D.touch)D.t=setTimeout(()=>{if(D&&!D.on)activate()},380);
+  });
+  nav.addEventListener("pointermove",e=>{
+    if(!D||e.pointerId!==D.id)return;
+    const mx=e.clientX-D.x,my=e.clientY-D.y;
+    if(!D.on){
+      if(Math.hypot(mx,my)<=8)return;
+      if(D.touch){reset();return}
+      activate();
+    }
+    const dx=mx+(nav.scrollLeft-D.s0),r=D.rects[D.i],c=r.l+dx+r.w/2;
+    let ni=0;D.rects.forEach((q,j)=>{if(j!==D.i&&q.l+q.w/2<c)ni++});D.ni=ni;
+    const sh=r.w+(D.rects.length>1?D.rects[1].l-(D.rects[0].l+D.rects[0].w):0);
+    tabs().forEach((x,j)=>{
+      x.style.transform=j===D.i?`translateX(${dx}px)`:(D.i<j&&j<=ni)?`translateX(${-sh}px)`:(ni<=j&&j<D.i)?`translateX(${sh}px)`:"";
+    });
+    const nr=nav.getBoundingClientRect();
+    if(e.clientX>nr.right-30)nav.scrollLeft+=10;else if(e.clientX<nr.left+30)nav.scrollLeft-=10;
+  });
+  nav.addEventListener("pointerup",e=>{
+    if(!D||e.pointerId!==D.id)return;
+    const on=D.on,i=D.i,ni=D.ni;reset();
+    if(on){window.__sup=true;setTimeout(()=>{window.__sup=false},60);
+      if(ni!=null&&ni!==i){const id=TABS.splice(i,1)[0];TABS.splice(ni,0,id)}
+      renderTabs()}
+  });
+  nav.addEventListener("pointercancel",e=>{if(D&&e.pointerId===D.id)reset()});
+  nav.addEventListener("touchmove",e=>{if(D&&D.on)e.preventDefault()},{passive:false});
+  nav.addEventListener("contextmenu",e=>e.preventDefault());
+})();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
